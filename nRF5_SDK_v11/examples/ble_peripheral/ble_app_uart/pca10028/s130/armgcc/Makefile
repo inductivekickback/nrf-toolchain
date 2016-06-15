@@ -34,6 +34,16 @@ else
 	GDBSERVER := JLinkGDBServer
 endif
 
+# If multiple J-Links are attached to the computer then "SN=1234" can be used
+# to specify a serial number for GDB and flash targets. A random GDB port will
+# be generated so multiple targets can be debugged simultaneously.
+GDB_PORT := 2331
+ifdef SN
+	NRFJPROG_SN := --snr $(SN)
+	GDB_SERVER_SN := -select usb=$(SN)
+	GDB_PORT := $(shell awk 'BEGIN{srand();printf("%4.4s", 1000+9999*rand())}')
+endif
+
 # Toolchain commands (these rely on the inclusion of the template Makefile)
 CC := $(GNU_INSTALL_ROOT)/bin/$(GNU_PREFIX)-gcc
 AS := $(GNU_INSTALL_ROOT)/bin/$(GNU_PREFIX)-as
@@ -199,8 +209,8 @@ define echosize
 endef
 
 define flash
-	@"$(NRFJPROG)" --program $1 -f nrf51 --sectorerase --verify
-	@"$(NRFJPROG)" --reset -f nrf51
+	@"$(NRFJPROG)" $(NRFJPROG_SN) --program $1 -f nrf51 --sectorerase --verify
+	@"$(NRFJPROG)" $(NRFJPROG_SN) --reset -f nrf51
 endef
 
 $(DBG_BUILD_DIR)/%.o: %.c | $(DBG_BUILD_DIR)
@@ -272,8 +282,9 @@ flash_release: release
 .PHONY: gdb
 gdb: ELF_PATH = "$(DBG_BUILD_DIR)/$(PROJECT_NAME).out"
 gdb: default
-	@$(TERMINAL) "'$(GDBSERVER)' -device nrf51 -if swd" $(BG_JOB)
-	@echo "target remote localhost:2331" > $(GDB_CMD_PATH)
+	@$(TERMINAL) "'$(GDBSERVER)' $(GDB_SERVER_SN) -device nrf51 \
+		-if swd -port $(GDB_PORT)" $(BG_JOB)
+	@echo "target remote localhost:$(GDB_PORT)" > $(GDB_CMD_PATH)
 	@echo "break main" >> $(GDB_CMD_PATH)
 	@echo "mon speed 10000" >> $(GDB_CMD_PATH)
 	@echo "mon flash download= 1" >> $(GDB_CMD_PATH)
@@ -290,11 +301,11 @@ clean:
 .PHONY: help
 help:
 	@echo "The following targets are available:"
-	@echo "    (default)     - Compile with debug flags"
-	@echo "    release       - Compile with release flags"
-	@echo "    all           - Compile debug and release targets"
-	@echo "    clean         - Remove object and dependency directories"
-	@echo "    gdb           - Perform debug compile and then launch gdb"
-	@echo "    flash_sd      - Flash the SoftDevice"
-	@echo "    flash_debug   - Flash the debug build"
-	@echo "    flash_release - Flash the release build"
+	@echo "    (default)              - Compile with debug flags"
+	@echo "    release                - Compile with release flags"
+	@echo "    all                    - Compile debug and release targets"
+	@echo "    clean                  - Remove object and dependency directories"
+	@echo "    gdb [SN=1234]          - Perform debug compile and then launch gdb"
+	@echo "    flash_sd [SN=1234]     - Flash the SoftDevice"
+	@echo "    flash_debug [SN=1234]  - Flash the debug build"
+	@echo "    flash_release [SN=1234]- Flash the release build"

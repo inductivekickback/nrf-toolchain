@@ -309,3 +309,7 @@ help:
 	@echo "    flash_sd [SN=1234]     - Flash the SoftDevice"
 	@echo "    flash_debug [SN=1234]  - Flash the debug build"
 	@echo "    flash_release [SN=1234]- Flash the release build"
+
+# This is a special target that tells make to delete a file if an error occurs
+# while the file is being generated.
+.DELETE_ON_ERROR:

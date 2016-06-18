@@ -25,13 +25,14 @@ ifeq ($(OS),Windows_NT)
 	TERMINAL := sh -c
 	BG_JOB := &
 	NRFJPROG := c:/Program Files (x86)/Nordic Semiconductor/nrf5x/bin/nrfjprog.exe
-	GDBSERVER := c:/Program Files (x86)/SEGGER/JLink_V512e/JLinkGDBServer.exe
+	RTT_CLIENT := c:/Program Files (x86)/SEGGER/JLink_V512e/JLinkRTTClient.exe
 else
 	include $(TEMPLATE_PATH)/Makefile.posix
 	TERMINAL := gnome-terminal -e
 	BG_JOB :=
 	NRFJPROG := nrfjprog
 	GDBSERVER := JLinkGDBServer
+	RTT_CLIENT := JLinkRTTClient
 endif
 
 # If multiple J-Links are attached to the computer then "SN=1234" can be used
@@ -323,6 +324,10 @@ gdb: default
 	@echo "mon reset 0" >> $(GDB_CMD_PATH)
 	@$(TERMINAL) "'$(GDB)' $(ELF_PATH) -x $(GDB_CMD_PATH)"
 
+.PHONY: gdb_rtt
+gdb_rtt: gdb
+	@$(TERMINAL) "'$(RTT_CLIENT)'"
+
 .PHONY: clean
 clean:
 	@rm -rf $(DBG_BUILD_DIR)
@@ -337,6 +342,7 @@ help:
 	@echo "    all                    - Compile debug and release targets"
 	@echo "    clean                  - Remove object and dependency directories"
 	@echo "    gdb [SN=1234]          - Perform debug compile and then launch gdb"
+	@echo "    gdb_rtt [SN=1234]      - Call gdb target and then open RTT Client"
 	@echo "    flash_sd [SN=1234]     - Flash the SoftDevice"
 	@echo "    flash_debug [SN=1234]  - Flash the debug build"
 	@echo "    flash_release [SN=1234]- Flash the release build"

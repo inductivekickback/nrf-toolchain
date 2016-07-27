@@ -283,14 +283,12 @@ $(REL_BUILD_DIR)/$(PROJECT_NAME).out: $(REL_OBJ)
 	@echo Linking ELF file: $(notdir $@)
 	@'$(CC)' $(LDFLAGS) $(REL_OBJ) -lm -o $@
 
-.DELETE_ON_ERROR:
 $(DEPS_DIR)/%.d: %.c | $(DEPS_DIR)
 	@echo Adding dependency for file: $(notdir $<)
 	@echo -n "$(DBG_BUILD_DIR)/$(notdir $(<:.c=.o)) " > $@
 	@'$(CC)' $(CFLAGS) $(INCLUDES) -c $< -MM \
 		-MT $(REL_BUILD_DIR)/$(notdir $(<:.c=.o)) >> $@
 
-.DELETE_ON_ERROR:
 $(DEPS_DIR)/%.d: %.s | $(DEPS_DIR)
 	@echo Adding dependency for file: $(notdir $<)
 	@echo -n "$(DBG_BUILD_DIR)/$(notdir $(<:.c=.o)) " > $@

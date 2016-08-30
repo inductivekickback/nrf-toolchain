@@ -167,8 +167,8 @@ release: $(REL_BUILD_DIR)/$(PROJECT_NAME).bin $(REL_BUILD_DIR)/$(PROJECT_NAME).h
 .PHONY: all
 all: default release
 
-DBG_DEP := $(addprefix $(DEPS_DIR)/,$(OBJ:.o=.d))
--include $(DBG_DEP)
+DEPS := $(addprefix $(DEPS_DIR)/,$(OBJ:.o=.d))
+-include $(DEPS)
 
 INCLUDES := $(patsubst %,-I%,$(INC_DIRS))
 

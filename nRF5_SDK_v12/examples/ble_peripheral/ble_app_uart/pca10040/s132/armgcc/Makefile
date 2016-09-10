@@ -167,11 +167,6 @@ INC_DIRS += \
 SRC_FILES := $(sort $(foreach f,$(SRC_FILES),$(abspath $(f))))
 INC_DIRS := $(sort $(foreach d,$(INC_DIRS),$(abspath $(d))))
 
-# This directory needs to be added after the main list is sorted because it
-# contains its own copy of 'nrf_drv_config.h' that will conflict with the
-# project's local version if it's found first.
-INC_DIRS += $(abspath $(SDK_ROOT)/components/drivers_nrf/config)
-
 SRC_DIRS := $(dir $(SRC_FILES) $(ASM_FILES))
 
 SRC_FILE_NAMES := $(notdir $(SRC_FILES) $(ASM_FILES))

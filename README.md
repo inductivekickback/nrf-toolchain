@@ -12,3 +12,10 @@ Makefiles and other toolchain artifacts.
 
 ## For SDK 13:
 - "components/toolchain/gcc/gcc_startup_nrf52.S" needs to be renamed to "components/toolchain/gcc/gcc_startup_nrf52.s"
+- An example Makefile for using Monitor Mode Debugging with J-Links was added.
+  - Requires a J-Link PLUS, ULTRA+, or PRO when using Linux or OSX
+  - Requires copying three files from the 'Sample project' [here](https://www.segger.com/monitor-mode-debugging.html):
+    - Create a new dir at {SDK13_ROOT}/external/jlink_monitor_mode_debug/gcc
+    - Copy JLINK_MONITOR.c, JLINK_MONITOR.h, and JLINK_MONITOR_ISR_SES.s to the new dir
+  - 'make gdb' will compile without the Monitor Mode files and start GDB in halt mode
+  - 'make MMD=1 gdb' will compile with the Monitor Mode files and start GDB in Monitor mode

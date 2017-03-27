@@ -8,7 +8,7 @@ Makefiles (GNU Make) and other toolchain artifacts.
     - Create a new dir e.g. {SDK13_ROOT}/external/jlink_monitor_mode_debug/gcc
     - Copy JLINK_MONITOR.c, JLINK_MONITOR.h, and JLINK_MONITOR_ISR_SES.s from the 'Sample project' to the new dir
     - Set JLINK_MON_DEBUG_DIR at the top of the Makefile to point to the new dir
-  - Requires adding `NVIC_SetPriority(DebugMonitor_IRQn, 7UL);`to the top of main.c.
+  - Requires calling `NVIC_SetPriority(DebugMonitor_IRQn, 7UL);`early (e.g. at the top of main).
     - The priority needs to be set one level higher than the priority of the code to be debugged (e.g. priority 7 for debugging Thread level, priority 6 for debugging APP_LOW, etc).
   - Debug builds will compile with the Monitor Mode files and 'make release' will exclude them.
 

@@ -19,9 +19,6 @@ GDB_CMD_PATH := $(DBG_BUILD_DIR)/gdb.txt
 
 SD_HEX_PATH := $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_4.0.2_softdevice.hex
 
-# GDB needs to know the offset of the application when using Monitor Mode Debugging.
-APP_FLASH_LOCATION := 0x1f000
-
 # Include the correct template Makefile depending on platform.
 TEMPLATE_PATH = $(SDK_ROOT)/components/toolchain/gcc
 ifeq ($(OS),Windows_NT)

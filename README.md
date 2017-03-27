@@ -9,9 +9,24 @@ Makefiles (GNU Make) and other toolchain artifacts.
     - Copy JLINK_MONITOR.c, JLINK_MONITOR.h, and JLINK_MONITOR_ISR_SES.s from the 'Sample project' to the new dir
     - Set JLINK_MON_DEBUG_DIR at the top of the Makefile to point to the new dir
   - Debug builds will compile with the Monitor Mode files and 'make release' will exclude them.
-  - 'make gdb' will update the debug build and launch GDB in Halt mode.
-  - 'make gdb_mon' will update the debug build and launch GDB in Monitor mode.
-  - Adding '_rtt' to either of the GDB targets will also open Segger's RTT Client.
+
+Update the debug build and launch GDB in Halt mode:
+```
+make gdb
+```
+
+Update the debug build and launch GDB in Monitor mode:
+```
+make gdb_mon
+```
+
+Segger's RTT Client can be launched by appending '_rtt' to the target:
+```
+make gdb_rtt
+```
+```
+make gdb_mon_rtt
+```
 
 ## For SDK 12:
 - "components/toolchain/gcc/gcc_startup_nrf52.S" needs to be renamed to "components/toolchain/gcc/gcc_startup_nrf52.s"

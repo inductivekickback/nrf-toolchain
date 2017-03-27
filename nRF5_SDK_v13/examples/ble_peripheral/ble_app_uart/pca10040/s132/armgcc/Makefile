@@ -19,6 +19,9 @@ GDB_CMD_PATH := $(DBG_BUILD_DIR)/gdb.txt
 
 SD_HEX_PATH := $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_4.0.2_softdevice.hex
 
+# GDB needs to know the offset of the application when using Monitor Mode Debugging.
+APP_FLASH_LOCATION := 0x1f000
+
 # Include the correct template Makefile depending on platform.
 TEMPLATE_PATH = $(SDK_ROOT)/components/toolchain/gcc
 ifeq ($(OS),Windows_NT)
@@ -60,6 +63,8 @@ SIZE := $(GNU_INSTALL_ROOT)/bin/$(GNU_PREFIX)-size
 GDB := $(GNU_INSTALL_ROOT)/bin/$(GNU_PREFIX)-gdb
 
 SHAREDFLAGS += \
+	-mcpu=cortex-m4 \
+	-mthumb \
 	-DNRF52 \
 	-DNRF52832_XXAA \
 	-DCONFIG_GPIO_AS_PINRESET \
@@ -72,8 +77,6 @@ SHAREDFLAGS += \
 	-DNRF52_PAN_74
 
 CFLAGS += \
-	-mcpu=cortex-m4 \
-	-mthumb \
 	--std=gnu99 \
 	-Wall \
 	-Werror \
@@ -135,8 +138,7 @@ SRC_FILES += \
 	$(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_printf.c \
 	$(SDK_ROOT)/components/ble/nrf_ble_gatt/nrf_ble_gatt.c
 
-ASM_FILES += \
-	$(SDK_ROOT)/components/toolchain/gcc/gcc_startup_nrf52.s
+ASM_FILES += $(SDK_ROOT)/components/toolchain/gcc/gcc_startup_nrf52.S
 
 INC_DIRS += \
 	$(SDK_ROOT)/components/libraries/log \
@@ -169,13 +171,16 @@ INC_DIRS += \
 	$(SDK_ROOT)/components/boards \
 	$(SDK_ROOT)/external/segger_rtt
 
+ASSEMBLY_EXT := s S
+
 # Convert to absolute paths and sort to remove duplicates.
-SRC_FILES := $(sort $(foreach f,$(SRC_FILES),$(abspath $(f))))
+SRC_FILES := $(sort $(foreach f,$(SRC_FILES) $(ASM_FILES),$(abspath $(f))))
 INC_DIRS := $(sort $(foreach d,$(INC_DIRS),$(abspath $(d))))
 
-SRC_DIRS := $(dir $(SRC_FILES) $(ASM_FILES))
-
-SRC_FILE_NAMES := $(notdir $(SRC_FILES) $(ASM_FILES))
+# Split the file paths into file names and directories. And remove duplicates.
+SRC_DIRS := $(sort $(dir $(SRC_FILES)))
+SRC_FILE_NAMES := $(notdir $(SRC_FILES))
+# $(warning $(SRC_FILE_NAMES))
 
 # Convert each source file name into the form '$(OBJ_DIR)/$(SRC_FILE).o'.
 OBJ := $(patsubst %,%.o,$(basename $(SRC_FILE_NAMES)))
@@ -183,7 +188,7 @@ DBG_OBJ := $(addprefix $(DBG_BUILD_DIR)/,$(OBJ))
 REL_OBJ := $(addprefix $(REL_BUILD_DIR)/,$(OBJ))
 
 .PHONY: default
-default: CFLAGS += -O0 -ggdb
+default: CFLAGS += -O0 -ggdb -DDEBUG -DDEBUG_NRF
 default: OBJ_DIR := $(DBG_BUILD_DIR)
 default: $(DBG_BUILD_DIR)/$(PROJECT_NAME).hex
 	$(call echosize,$(DBG_BUILD_DIR)/$(PROJECT_NAME).out)
@@ -202,8 +207,8 @@ DEPS := $(addprefix $(DEPS_DIR)/,$(OBJ:.o=.d))
 
 INCLUDES := $(patsubst %,-I%,$(INC_DIRS))
 
-vpath %.c $(SRC_DIRS)
-vpath %.s $(SRC_DIRS)
+# Look for all source files in SRC_DIRS.
+vpath % $(SRC_DIRS)
 
 define echosize
 	@echo ''
@@ -220,10 +225,6 @@ $(DBG_BUILD_DIR)/%.o: %.c | $(DBG_BUILD_DIR)
 	@echo Compiling file: $(notdir $<)
 	@'$(CC)' $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
-$(DBG_BUILD_DIR)/%.o: %.s | $(DBG_BUILD_DIR)
-	@echo Compiling file: $(notdir $<)
-	@'$(CC)' $(ASMFLAGS) $(INCLUDES) -c -o $@ $<
-
 $(DBG_BUILD_DIR)/$(PROJECT_NAME).hex: $(DBG_BUILD_DIR)/$(PROJECT_NAME).out
 	@echo Creating hex file: $(notdir $@)
 	@'$(OBJCOPY)' -O ihex $(DBG_BUILD_DIR)/$(PROJECT_NAME).out $@
@@ -239,10 +240,6 @@ $(DBG_BUILD_DIR)/$(PROJECT_NAME).out: $(DBG_OBJ)
 $(REL_BUILD_DIR)/%.o: %.c | $(REL_BUILD_DIR)
 	@echo Compiling file: $(notdir $<)
 	@'$(CC)' $(CFLAGS) $(INCLUDES) -c -o $@ $<
-
-$(REL_BUILD_DIR)/%.o: %.s | $(REL_BUILD_DIR)
-	@echo Compiling file: $(notdir $<)
-	@'$(CC)' $(ASMFLAGS) $(INCLUDES) -c -o $@ $<
 
 $(REL_BUILD_DIR)/$(PROJECT_NAME).hex: $(REL_BUILD_DIR)/$(PROJECT_NAME).out
 	@echo Creating hex file: $(notdir $@)
@@ -262,11 +259,24 @@ $(DEPS_DIR)/%.d: %.c | $(DEPS_DIR)
 	@'$(CC)' $(CFLAGS) $(INCLUDES) -c $< -MM \
 		-MT $(REL_BUILD_DIR)/$(notdir $(<:.c=.o)) >> $@
 
-$(DEPS_DIR)/%.d: %.s | $(DEPS_DIR)
-	@echo Adding dependency for file: $(notdir $<)
-	@echo -n "$(DBG_BUILD_DIR)/$(notdir $(<:.c=.o)) " > $@
-	@'$(CC)' $(ASMFLAGS) $(INCLUDES) -c $< -MM \
-		-MT $(REL_BUILD_DIR)/$(notdir $(<:.c=.o)) >> $@
+# The eval command is used to create a different version of these targets for
+# each extension in the ASSEMBLY_EXT list.
+define assembly_targets
+$$(DBG_BUILD_DIR)/%.o: %.$1 | $$(DBG_BUILD_DIR)
+	@echo Compiling assembly file: $$(notdir $$<)
+	@'$$(CC)' $$(ASMFLAGS) $$(INCLUDES) -c -o $$@ $$<
+
+$$(REL_BUILD_DIR)/%.o: %.$1 | $$(REL_BUILD_DIR)
+	@echo Compiling assembly file: $$(notdir $$<)
+	@'$$(CC)' $$(ASMFLAGS) $$(INCLUDES) -c -o $$@ $$<
+
+$$(DEPS_DIR)/%.d: %.$1 | $$(DEPS_DIR)
+	@echo Adding dependency for file: $$(notdir $$<)
+	@echo -n "$$(DBG_BUILD_DIR)/$$(notdir $$(<:.$1=.o)) " > $$@
+	@'$$(CC)' $$(ASMFLAGS) $$(INCLUDES) -c $$< -MM \
+		-MT $$(REL_BUILD_DIR)/$$(notdir $$(<:.$1=.o)) >> $$@
+endef    
+$(foreach EXT,$(ASSEMBLY_EXT),$(eval $(call assembly_targets,$(EXT))))
 
 $(DEPS_DIR) $(DBG_BUILD_DIR) $(REL_BUILD_DIR):; @mkdir $@
 
@@ -285,14 +295,14 @@ flash_release: release
 .PHONY: gdb
 gdb: ELF_PATH = "$(DBG_BUILD_DIR)/$(PROJECT_NAME).out"
 gdb: default
-	@$(TERMINAL) "'$(GDBSERVER)' $(GDB_SERVER_SN) -device nrf52 \
-		-if swd -port $(GDB_PORT)" $(BG_JOB)
 	@echo "target remote localhost:$(GDB_PORT)" > $(GDB_CMD_PATH)
-	@echo "break main" >> $(GDB_CMD_PATH)
 	@echo "mon speed 10000" >> $(GDB_CMD_PATH)
-	@echo "mon flash download= 1" >> $(GDB_CMD_PATH)
+	@echo "mon flash download=1" >> $(GDB_CMD_PATH)
 	@echo "load $(ELF_PATH)" >> $(GDB_CMD_PATH)
+	@echo "break main" >> $(GDB_CMD_PATH)
 	@echo "mon reset 0" >> $(GDB_CMD_PATH)
+	@$(TERMINAL) "'$(GDBSERVER)' $(GDB_SERVER_SN) -device nrf52832_XXAA \
+		-if swd -port $(GDB_PORT)" $(BG_JOB)
 	@$(TERMINAL) "'$(GDB)' $(ELF_PATH) -x $(GDB_CMD_PATH)"
 
 .PHONY: gdb_rtt

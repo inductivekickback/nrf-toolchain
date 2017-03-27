@@ -177,7 +177,6 @@ INC_DIRS := $(sort $(foreach d,$(INC_DIRS),$(abspath $(d))))
 # Split the file paths into file names and directories. And remove duplicates.
 SRC_DIRS := $(sort $(dir $(SRC_FILES)))
 SRC_FILE_NAMES := $(notdir $(SRC_FILES))
-# $(warning $(SRC_FILE_NAMES))
 
 # Convert each source file name into the form '$(OBJ_DIR)/$(SRC_FILE).o'.
 OBJ := $(patsubst %,%.o,$(basename $(SRC_FILE_NAMES)))

@@ -42,8 +42,9 @@ ifeq ($(OS),Windows_NT)
 # in the background.
 	TERMINAL := sh -c
 	BG_JOB := &
-	NRFJPROG := c:/Program Files (x86)/Nordic Semiconductor/nrf5x/bin/nrfjprog.exe
-	RTT_CLIENT := c:/Program Files (x86)/SEGGER/JLink_V512e/JLinkRTTClient.exe
+	NRFJPROG := nrfjprog.exe
+	GDBSERVER := JLinkGDBServerCL.exe
+	RTT_CLIENT := JLinkRTTClient.exe
 else
 	include $(TEMPLATE_PATH)/Makefile.posix
 	TERMINAL := gnome-terminal -e

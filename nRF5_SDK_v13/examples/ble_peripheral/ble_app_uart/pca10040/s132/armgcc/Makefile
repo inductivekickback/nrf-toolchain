@@ -38,17 +38,17 @@ SD_HEX_PATH := $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_4.0.2_softd
 TEMPLATE_PATH = $(SDK_ROOT)/components/toolchain/gcc
 ifeq ($(OS),Windows_NT)
 	include $(TEMPLATE_PATH)/Makefile.windows
-# The -e option doesn't work in cygwin so -c is used and the job is placed
-# in the background.
-	TERMINAL := sh -c
-	BG_JOB := &
+# The Windows command shell 'start' function is used so the executable
+# is started in its own window.
+	TERMINAL := cmd /c start ""
+	TERMINAL_END := 
 	NRFJPROG := nrfjprog.exe
 	GDBSERVER := JLinkGDBServerCL.exe
 	RTT_CLIENT := JLinkRTTClient.exe
 else
 	include $(TEMPLATE_PATH)/Makefile.posix
-	TERMINAL := gnome-terminal -e
-	BG_JOB :=
+	TERMINAL := gnome-terminal -e "
+	TERMINAL_END := "
 	NRFJPROG := nrfjprog
 	GDBSERVER := JLinkGDBServer
 	RTT_CLIENT := JLinkRTTClient
@@ -326,6 +326,7 @@ gdb_cmd_file: default
 	@echo "load $(DBG_BUILD_DIR)/$(PROJECT_NAME).out" >> $(GDB_CMD_PATH)
 	@echo "break main" >> $(GDB_CMD_PATH)
 	@echo "mon reset 0" >> $(GDB_CMD_PATH)
+	@echo "c" >> $(GDB_CMD_PATH)
 
 .PHONY: gdb_mon_cmd_file
 gdb_mon_cmd_file: gdb_cmd_file
@@ -334,13 +335,13 @@ gdb_mon_cmd_file: gdb_cmd_file
 
 .PHONY: gdb_cli
 gdb_cli:
-	@$(TERMINAL) "'$(GDBSERVER)' $(GDB_SERVER_SN) -device nrf52832_XXAA \
-		-if swd -port $(GDB_PORT)" $(BG_JOB)
-	@$(TERMINAL) "'$(GDB)' $(DBG_BUILD_DIR)/$(PROJECT_NAME).out -x $(GDB_CMD_PATH)"
+	@$(TERMINAL) '$(GDBSERVER)' $(GDB_SERVER_SN) -device nrf52832_XXAA \
+		-if swd -port $(GDB_PORT) $(TERMINAL_END)
+	@$(TERMINAL) '$(GDB)' $(DBG_BUILD_DIR)/$(PROJECT_NAME).out -x $(GDB_CMD_PATH) $(TERMINAL_END)
 
 .PHONY: rtt
 rtt:
-	@$(TERMINAL) "'$(RTT_CLIENT)'"
+	@$(TERMINAL) '$(RTT_CLIENT)' $(TERMINAL_END)
 
 .PHONY: gdb
 gdb: gdb_cmd_file gdb_cli

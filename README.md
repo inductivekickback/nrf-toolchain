@@ -2,6 +2,7 @@
 Makefiles (GNU Make) and other toolchain artifacts.
 
 ## For SDK 13:
+NOTE: This version of the Makefile has been tested under Windows 10 using the standard command shell as well as Ubuntu using Bash. **If Cygwin is used on a Windows machine then ctrl-c will cause GDB to terminate instead of triggering a breakpoint trap.**
 - Support for using [Monitor Mode Debugging](https://devzone.nordicsemi.com/blogs/1088/monitor-mode-debugging-with-j-link-and-gdbeclipse/) with J-Links was added.
   - Requires a J-Link PLUS, ULTRA+, or PRO when using Linux or OSX. Can be evaluated using a J-Link Lite on Windows by accepting a license pop-up. **The J-Link driver silently falls back to Halt mode on Linux/OSX when using a J-Link Lite.**
   - Requires copying three files from the 'Sample project' [here](https://www.segger.com/monitor-mode-debugging.html):

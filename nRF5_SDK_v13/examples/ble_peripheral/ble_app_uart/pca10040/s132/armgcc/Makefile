@@ -238,7 +238,7 @@ vpath % $(SRC_DIRS) $(DBG_SRC_DIRS)
 
 define echosize
 	@echo ''
-	@'$(SIZE)' $1;
+	@'$(SIZE)' $1
 	@echo ''
 endef
 
@@ -281,8 +281,8 @@ $(REL_BUILD_DIR)/$(PROJECT_NAME).out: $(REL_OBJ)
 
 $(DEPS_DIR)/%.d: %.c | $(DEPS_DIR)
 	@echo Adding dependency for file: $(notdir $<)
-	@echo -n "$(DBG_BUILD_DIR)/$(notdir $(<:.c=.o)) " > $@
-	@'$(CC)' $(CFLAGS) $(INCLUDES) -c $< -MM \
+	@printf "$(DBG_BUILD_DIR)/$(notdir $(<:.c=.o)) " >$@
+	@"$(CC)" $(CFLAGS) $(INCLUDES) -c $< -MM \
 		-MT $(REL_BUILD_DIR)/$(notdir $(<:.c=.o)) >> $@
 
 # The eval command is used to create a different version of these targets for
@@ -298,9 +298,9 @@ $$(REL_BUILD_DIR)/%.o: %.$1 | $$(REL_BUILD_DIR)
 
 $$(DEPS_DIR)/%.d: %.$1 | $$(DEPS_DIR)
 	@echo Adding dependency for file: $$(notdir $$<)
-	@echo -n "$$(DBG_BUILD_DIR)/$$(notdir $$(<:.$1=.o)) " > $$@
-	@'$$(CC)' $$(ASMFLAGS) $$(INCLUDES) -c $$< -MM \
-		-MT $$(REL_BUILD_DIR)/$$(notdir $$(<:.$1=.o)) >> $$@
+	@printf "$$(DBG_BUILD_DIR)/$$(notdir $$(<:.$1=.o)) " >$$@
+	@"$$(CC)" $$(ASMFLAGS) $$(INCLUDES) -c $$< -MM \
+		-MT $$(REL_BUILD_DIR)/$$(notdir $$(<:.$1=.o)) >>$$@
 endef
 $(foreach EXT,$(ASSEMBLY_EXTS),$(eval $(call assembly_targets,$(EXT))))
 

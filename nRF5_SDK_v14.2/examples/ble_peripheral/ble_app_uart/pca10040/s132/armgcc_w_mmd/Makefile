@@ -20,7 +20,7 @@ GDB_CMD_PATH := $(DBG_BUILD_DIR)/gdb.txt
 SD_HEX_PATH := $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_5.0.0_softdevice.hex
 
 # GDB needs to know the offset of the application when using Monitor Mode Debugging.
-APP_FLASH_LOCATION := 0x1f000
+APP_FLASH_LOCATION := 0x23000
 
 # Include the correct template Makefile depending on platform.
 TEMPLATE_PATH = $(SDK_ROOT)/components/toolchain/gcc
@@ -88,9 +88,9 @@ CFLAGS += \
 	-fno-builtin \
 	-fshort-enums \
 	-mabi=aapcs \
-	$(SHAREDFLAGS) \
+	$(SHAREDFLAGS)
 ifdef MMD
-	CFLAGS += -DMMD
+CFLAGS += -DMMD
 endif
 
 ASMFLAGS += \
@@ -111,7 +111,7 @@ LDFLAGS += \
 	-mfloat-abi=hard \
 	-mfpu=fpv4-sp-d16 \
 	-Wl,--gc-sections \
-	--specs=nano.specs \
+	--specs=nano.specs
 
 # Add standard libraries at the very end of the linker input, after all objects
 # that may need symbols provided by these libraries.
@@ -170,15 +170,15 @@ SRC_FILES += \
 	$(SDK_ROOT)/components/ble/ble_services/ble_nus/ble_nus.c \
 	$(SDK_ROOT)/components/softdevice/common/nrf_sdh.c \
 	$(SDK_ROOT)/components/softdevice/common/nrf_sdh_ble.c \
-	$(SDK_ROOT)/components/softdevice/common/nrf_sdh_soc.c \
+	$(SDK_ROOT)/components/softdevice/common/nrf_sdh_soc.c
 ifdef MMD
-	SRC_FILES += $(SDK_ROOT)/external/jlink_monitor_mode_debug/gcc/JLINK_MONITOR.c
+SRC_FILES += $(SDK_ROOT)/external/jlink_monitor_mode_debug/gcc/JLINK_MONITOR.c
 endif
 
 ASM_FILES += \
 	$(SDK_ROOT)/components/toolchain/gcc/gcc_startup_nrf52.s
 ifdef MMD
-	ASM_FILES += $(SDK_ROOT)/external/jlink_monitor_mode_debug/gcc/JLINK_MONITOR_ISR_SES.s
+ASM_FILES += $(SDK_ROOT)/external/jlink_monitor_mode_debug/gcc/JLINK_MONITOR_ISR_SES.s
 endif
 
 INC_DIRS += \
@@ -296,7 +296,7 @@ INC_DIRS += \
 	$(SDK_ROOT)/components/drivers_nrf/usbd \
 	$(SDK_ROOT)/components/ble/ble_services/ble_hrs
 ifdef MMD
-	INC_DIRS += $(SDK_ROOT)/external/jlink_monitor_mode_debug/gcc
+INC_DIRS += $(SDK_ROOT)/external/jlink_monitor_mode_debug/gcc
 endif
 
 # Convert to absolute paths and sort to remove duplicates.

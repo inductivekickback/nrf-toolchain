@@ -1,6 +1,6 @@
 ## Secure bootloader Makefile and linker scripts
 
-NOTE: The "--sd-req" option to give nrfutil when generating a package that includes a SoftDevice can be determined empirically using the [sd_info_struct.py script](https://github.com/inductivekickback/nrf-toolchain/blob/master/utils/sd_info_struct.py):
+NOTE: The "--sd-req" option to give nrfutil when generating a package that includes a SoftDevice can be determined empirically by using the [sd_info_struct.py script](https://github.com/inductivekickback/nrf-toolchain/blob/master/utils/sd_info_struct.py) to read the SD_FWID:
 
 ```
 python2 sd_info_struct.py ../../Nordic-Thingy52-FW/external/sdk/components/softdevice/s332/hex/ANT_s332_nrf52_2.0.1.hex

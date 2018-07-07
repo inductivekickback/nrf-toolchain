@@ -26,7 +26,7 @@ JLINK_MON_DEBUG_FILES := JLINK_MONITOR.c JLINK_MONITOR_ISR_SES.s
 
 # The offset of the application needs to be specified so the J-Link knows
 # the location of the DebugMon_Handler.
-JLINK_MON_DEBUG_APP_FLASH_LOCATION := 0x6f400
+JLINK_MON_DEBUG_APP_FLASH_LOCATION := 0x6f000
 
 # Init commands will be written to a file and then specified when starting GDB
 # instead of relying on .gdbinit (to avoid having to enable .gbdinit files).

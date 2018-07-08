@@ -10,10 +10,10 @@ DEPS_DIR := ./_deps
 
 SDK_ROOT := ../../..
 PROJ_DIR := ..
-COMPONENTS_DIR := $(SDK_ROOT)/sdk_components
+COMPONENTS_DIR := $(SDK_ROOT)/external/sdk13/components
 SOURCE_DIR := $(SDK_ROOT)/source
 LIBS_DIR := $(SDK_ROOT)/libs
-EXTERNAL_DIR := $(SDK_ROOT)/external
+EXTERNAL_DIR := $(SDK_ROOT)/external/sdk13/external
 INCLUDE_DIR := $(SDK_ROOT)/include
 
 # JLINK_MON_DEBUG_DIR should point to the directory that contains the files
@@ -247,10 +247,11 @@ SRC_FILES += \
 	$(COMPONENTS_DIR)/libraries/bootloader/dfu/nrf_dfu_settings.c \
 	$(COMPONENTS_DIR)/libraries/crc32/crc32.c \
 	$(COMPONENTS_DIR)/libraries/strerror/nrf_strerror.c) \
-	$(EXTERNAL_DIR)/sdk13_override/softdevice_handler_appsh.c \
+	$(SDK_ROOT)/external/sdk13_override/softdevice_handler_appsh.c \
 	$(COMPONENTS_DIR)/toolchain/gcc/gcc_startup_nrf52.S
 
 INC_DIRS += \
+	$(SDK_ROOT)/external/sdk13_override \
 	$(COMPONENTS_DIR)/device \
 	$(COMPONENTS_DIR)/toolchain/cmsis/include \
 	$(COMPONENTS_DIR)/toolchain/gcc \

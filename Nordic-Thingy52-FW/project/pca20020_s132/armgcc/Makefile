@@ -246,7 +246,7 @@ SRC_FILES += \
 	$(COMPONENTS_DIR)/ble/ble_services/ble_bas/ble_bas.c \
 	$(COMPONENTS_DIR)/libraries/bootloader/dfu/nrf_dfu_settings.c \
 	$(COMPONENTS_DIR)/libraries/crc32/crc32.c \
-	$(COMPONENTS_DIR)/libraries/strerror/nrf_strerror.c) \
+	$(COMPONENTS_DIR)/libraries/strerror/nrf_strerror.c \
 	$(SDK_ROOT)/external/sdk13_override/softdevice_handler_appsh.c \
 	$(COMPONENTS_DIR)/toolchain/gcc/gcc_startup_nrf52.S
 
@@ -318,7 +318,8 @@ INC_DIRS += \
 	$(LIBS_DIR)/dvi_adpcm \
 	$(LIBS_DIR)/bv32fp-1.2 \
 	$(COMPONENTS_DIR)/drivers_nrf/rng \
-	$(COMPONENTS_DIR)/libraries/queue
+	$(COMPONENTS_DIR)/libraries/queue \
+	$(COMPONENTS_DIR)/libraries/strerror
 
 # The Monitor Mode debugging files will always be tracked by make if they are
 # used during debugging. They won't be passed to the linker for the release

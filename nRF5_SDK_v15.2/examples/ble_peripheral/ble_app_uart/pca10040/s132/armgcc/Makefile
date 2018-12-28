@@ -32,7 +32,7 @@ JLINK_MON_DEBUG_FILES := JLINK_MONITOR.c JLINK_MONITOR_ISR_SES.s
 # instead of relying on .gdbinit (to avoid having to enable .gbdinit files).
 GDB_CMD_PATH := $(DBG_BUILD_DIR)/gdb.txt
 
-SD_HEX_PATH := $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_5.0.0_softdevice.hex
+SD_HEX_PATH := $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex
 
 # Include the correct template Makefile depending on platform.
 TEMPLATE_PATH = $(SDK_ROOT)/components/toolchain/gcc

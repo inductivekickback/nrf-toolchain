@@ -37,3 +37,21 @@ However, if the input hex file already contains an APPROTECT setting then a warn
 $ python3 approtect.py -i app_w_uicr.hex -o app_w_uicr.hex -d
 warning: infile contained the DISABLE APPROTECT value to unlock the device
 ```
+
+### Testing
+Functionality can be verified directly:
+```
+$ python3 approtect.py -i zephyr.hex -o app_w_uicr.hex --enable
+$ nrfjprog --recover
+Recovering device. This operation might take 30s.
+Writing image to disable ap protect.
+Erasing user code and UICR flash areas.
+$ nrfjprog --memrd 0x10001208
+0x10001208: 0000005A                              |Z...|
+$ nrfjprog --program app_w_uicr.hex 
+Parsing image file.
+Applying system reset.
+Verified OK.
+$ nrfjprog --memrd 0x10001208
+0x10001208: 00000000                              |....|
+```

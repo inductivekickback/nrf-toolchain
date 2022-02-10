@@ -7,7 +7,7 @@ $ pip3 install --user intelhex
 ```
 
 ### Usage
-The tool expects the path to a SoftDevice hex file as an input and a path for the hex file to use as the output. A third path can be specified if the MBR needs to be saved to its own hex file. **The input hex file is not modifed.**
+The tool expects the path to a SoftDevice hex file as an input as well as a path to use for the output hex file. A third path can be specified if the MBR needs to be saved to its own hex file. **The input hex file is not modifed.**
 ```
 $ python3 mbr_strip.py --help
 usage: mbr_strip [-h] -i INPUT_HEX_FILE -o OUTPUT_HEX_FILE [-m MBR_HEX_FILE]
@@ -29,7 +29,7 @@ $ python3 mbr_strip.py -i s113_nrf52_7.2.0_softdevice.hex -o s113_7.2.0_stripped
 ```
 
 ### Testing
-nrfjprog can be used to verify the integrity of the new hex files. First plug in an nRF52 DK and then:
+[nrfjprog](https://www.nordicsemi.com/Products/Development-tools/nRF-Command-Line-Tools) can be used to verify the integrity of the new hex files. First plug in an nRF52 DK and then:
 ```
 $ python3 mbr_strip.py -i s113_nrf52_7.2.0_softdevice.hex -o s113_7.2.0_stripped.hex -m stripped_mbr_2.4.1.hex
 $ nrfjprog --recover

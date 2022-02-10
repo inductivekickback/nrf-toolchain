@@ -7,7 +7,7 @@ $ pip3 install --user intelhex
 ```
 
 ### Usage
-The tool expects the path to a hex file as an input, the name of the hex file to use as the output, and whether the access port protection should be enabled or disabled.
+The tool expects the path to a hex file as an input, a path to use for the output hex file, and whether the access port protection should be enabled or disabled.
 ```
 $ python3 approtect.py --help
 usage: approtect [-h] -i INPUT_HEX_FILE -o OUTPUT_HEX_FILE [-d | -e]

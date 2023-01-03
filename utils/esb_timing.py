@@ -62,10 +62,12 @@ def pkt_len_tx_w_ack_2mbps_us(pl_len_bytes, ack_pl_len_bytes, pcf_bits=11, ramp_
     """ NOTE: If RX takes longer than TX then the transmitter will remain in RX for some
     extra time while waiting for the ACK.
     """
+    baseline_tx_us = pkt_len_tx_2mbps_us(0, pcf_bits, ramp_up_us)
+    baseline_rx_us = pkt_len_rx_2mbps_us(0, pcf_bits, ramp_up_us)
     tx_us = pkt_len_tx_2mbps_us(pl_len_bytes, pcf_bits, ramp_up_us)
     rx_us = pkt_len_rx_2mbps_us(ack_pl_len_bytes, pcf_bits, ramp_up_us)
-    if rx_us > tx_us:
-        return tx_us + rx_us + (rx_us - tx_us)
+    if baseline_rx_us > baseline_tx_us:
+        return tx_us + rx_us + (baseline_rx_us - baseline_tx_us)
     return tx_us + rx_us
 
 
@@ -100,10 +102,10 @@ def pkt_energy_tx_w_ack_2mbps_j(pl_len_bytes, ack_pl_len_bytes, device_str,
     extra time while waiting for the ACK.
     """
     diff_us = 0
-    tx_us = pkt_len_tx_2mbps_us(pl_len_bytes, pcf_bits, ramp_up_us)
-    rx_us = pkt_len_rx_2mbps_us(ack_pl_len_bytes, pcf_bits, ramp_up_us)
-    if rx_us > tx_us:
-        diff_us = (rx_us - tx_us)
+    baseline_tx_us = pkt_len_tx_2mbps_us(0, pcf_bits, ramp_up_us)
+    baseline_rx_us = pkt_len_rx_2mbps_us(0, pcf_bits, ramp_up_us)
+    if baseline_rx_us > baseline_tx_us:
+        diff_us = (baseline_rx_us - baseline_tx_us)
     tx_j = pkt_energy_tx_2mbps_j(pl_len_bytes, device_str, pcf_bits, ramp_up_us)
     rx_j = pkt_energy_rx_2mbps_j(ack_pl_len_bytes, device_str, pcf_bits, ramp_up_us, diff_us)
     return tx_j + rx_j

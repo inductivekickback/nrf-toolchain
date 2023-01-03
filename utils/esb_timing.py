@@ -1,3 +1,5 @@
+""" Estimate ESB packet timing and energy based on datasheet parameters. """
+
 # See Product Specifications for more information:
 # - nRF5340: https://bit.ly/3IAPGcw
 # - nrf52840: https://bit.ly/3z1saTd
@@ -57,11 +59,18 @@ def pkt_len_rx_2mbps_us(pl_len_bytes, pcf_bits=11, ramp_up_us=40):
 
 
 def pkt_len_tx_w_ack_2mbps_us(pl_len_bytes, ack_pl_len_bytes, pcf_bits=11, ramp_up_us=40):
+    """ NOTE: If RX takes longer than TX then the transmitter will remain in RX for some
+    extra time while waiting for the ACK.
+    """
     tx_us = pkt_len_tx_2mbps_us(pl_len_bytes, pcf_bits, ramp_up_us)
-    return tx_us + pkt_len_rx_2mbps_us(ack_pl_len_bytes, pcf_bits, ramp_up_us)
+    rx_us = pkt_len_rx_2mbps_us(ack_pl_len_bytes, pcf_bits, ramp_up_us)
+    if rx_us > tx_us:
+        return tx_us + rx_us + (rx_us - tx_us)
+    return tx_us + rx_us
 
 
 def pkt_len_rx_w_ack_2mbps_us(pl_len_bytes, ack_pl_len_bytes, pcf_bits=11, ramp_up_us=40):
+    """"""
     rx_us = pkt_len_rx_2mbps_us(pl_len_bytes, pcf_bits, ramp_up_us)
     return rx_us + pkt_len_tx_2mbps_us(ack_pl_len_bytes, pcf_bits, ramp_up_us)
 
@@ -75,22 +84,33 @@ def pkt_energy_tx_2mbps_j(pl_len_bytes, device_str, pcf_bits=11, ramp_up_us=40):
     return start_j + tx_j
 
 
-def pkt_energy_rx_2mbps_j(pl_len_bytes, device_str, pcf_bits=11, ramp_up_us=40):
+def pkt_energy_rx_2mbps_j(pl_len_bytes, device_str, pcf_bits=11, ramp_up_us=40, extra_wait_us=0):
     """Standard measurements in the Product Specifications use VDD=3."""
     start_a = RADIO_CURRENTS_3V_DCDC_0DBM_A[device_str]['ISTART,RX,1M,DCDC']
     rx_a = RADIO_CURRENTS_3V_DCDC_0DBM_A[device_str]['IRX,2M,DCDC']
     start_j = 3 * start_a * ramp_up_us / 1000000
-    rx_j = 3 * rx_a * _on_air_len_2mbps_us(pl_len_bytes, pcf_bits, False) / 1000000
+    on_air_us = _on_air_len_2mbps_us(pl_len_bytes, pcf_bits, False) + extra_wait_us
+    rx_j = 3 * rx_a * on_air_us / 1000000
     return start_j + rx_j
 
 
-def pkt_energy_tx_w_ack_2mbps_j(pl_len_bytes, ack_pl_len_bytes, device_str, pcf_bits=11, ramp_up_us=40):
-    """"""
+def pkt_energy_tx_w_ack_2mbps_j(pl_len_bytes, ack_pl_len_bytes, device_str,
+        pcf_bits=11, ramp_up_us=40):
+    """ NOTE: If RX takes longer than TX then the transmitter will remain in RX for some
+    extra time while waiting for the ACK.
+    """
+    diff_us = 0
+    tx_us = pkt_len_tx_2mbps_us(pl_len_bytes, pcf_bits, ramp_up_us)
+    rx_us = pkt_len_rx_2mbps_us(ack_pl_len_bytes, pcf_bits, ramp_up_us)
+    if rx_us > tx_us:
+        diff_us = (rx_us - tx_us)
     tx_j = pkt_energy_tx_2mbps_j(pl_len_bytes, device_str, pcf_bits, ramp_up_us)
-    return tx_j + pkt_energy_rx_2mbps_j(ack_pl_len_bytes, device_str, pcf_bits, ramp_up_us)
+    rx_j = pkt_energy_rx_2mbps_j(ack_pl_len_bytes, device_str, pcf_bits, ramp_up_us, diff_us)
+    return tx_j + rx_j
 
 
-def pkt_energy_rx_w_ack_2mbps_j(pl_len_bytes, ack_pl_len_bytes, device_str, pcf_bits=11, ramp_up_us=40):
+def pkt_energy_rx_w_ack_2mbps_j(pl_len_bytes, ack_pl_len_bytes, device_str,
+        pcf_bits=11, ramp_up_us=40):
     """"""
     rx_j = pkt_energy_rx_2mbps_j(pl_len_bytes, device_str, pcf_bits, ramp_up_us)
     return rx_j + pkt_energy_tx_2mbps_j(ack_pl_len_bytes, device_str, pcf_bits, ramp_up_us)
